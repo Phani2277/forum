@@ -21,6 +21,7 @@ func main() {
 
 	app := server.New(db)
 	mux := http.NewServeMux()
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	mux.HandleFunc("/", app.Home)
 	mux.HandleFunc("/register", app.Register)
 	mux.HandleFunc("/login", app.Login)

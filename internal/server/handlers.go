@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -15,13 +16,18 @@ import (
 // App holds application dependencies.
 type App struct {
 	DB        *sql.DB
-	Templates *template.Template
+	Templates map[string]*template.Template
 }
 
 // New creates a new App instance.
 func New(db *sql.DB) *App {
-	tmpl := template.Must(template.ParseGlob("templates/*.html"))
-	return &App{DB: db, Templates: tmpl}
+	base := template.Must(template.ParseFiles("templates/base.html"))
+	files := []string{"index.html", "login.html", "register.html", "create_post.html", "post.html"}
+	templates := make(map[string]*template.Template)
+	for _, f := range files {
+		templates[f] = template.Must(template.Must(base.Clone()).ParseFiles(filepath.Join("templates", f)))
+	}
+	return &App{DB: db, Templates: templates}
 }
 
 // Helper to get current user from request.
@@ -66,14 +72,14 @@ func (a *App) Home(w http.ResponseWriter, r *http.Request) {
 		"Filter":      filter,
 		"Category":    category,
 	}
-	a.Templates.ExecuteTemplate(w, "index.html", data)
+	a.Templates["index.html"].ExecuteTemplate(w, "base", data)
 }
 
 // Register displays and handles user registration.
 func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		a.Templates.ExecuteTemplate(w, "register.html", nil)
+		a.Templates["register.html"].ExecuteTemplate(w, "base", nil)
 	case http.MethodPost:
 		email := strings.TrimSpace(r.FormValue("email"))
 		username := strings.TrimSpace(r.FormValue("username"))
@@ -96,7 +102,7 @@ func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		a.Templates.ExecuteTemplate(w, "login.html", nil)
+		a.Templates["login.html"].ExecuteTemplate(w, "base", nil)
 	case http.MethodPost:
 		email := r.FormValue("email")
 		password := r.FormValue("password")
@@ -142,7 +148,7 @@ func (a *App) CreatePost(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		categories, _ := models.GetCategories(a.DB)
 		data := map[string]interface{}{"Categories": categories}
-		a.Templates.ExecuteTemplate(w, "create_post.html", data)
+		a.Templates["create_post.html"].ExecuteTemplate(w, "base", data)
 	case http.MethodPost:
 		title := strings.TrimSpace(r.FormValue("title"))
 		content := strings.TrimSpace(r.FormValue("content"))
@@ -186,7 +192,7 @@ func (a *App) ViewPost(w http.ResponseWriter, r *http.Request) {
 			"Comments":    comments,
 			"CurrentUser": a.currentUser(r),
 		}
-		a.Templates.ExecuteTemplate(w, "post.html", data)
+		a.Templates["post.html"].ExecuteTemplate(w, "base", data)
 	case http.MethodPost:
 		cu := a.currentUser(r)
 		if cu == nil {
