@@ -1,0 +1,43 @@
+{{define "title"}}{{.Post.Title}}{{end}}
+{{define "content"}}
+<article>
+<h1>{{.Post.Title}}</h1>
+<p>by {{.Post.Username}} at {{.Post.CreatedAt}}</p>
+<p>{{.Post.Content}}</p>
+<p>Categories: {{range .Post.Categories}}<span>{{.}}</span> {{end}}</p>
+<p>Likes: {{.Post.Likes}} Dislikes: {{.Post.Dislikes}}</p>
+{{if .CurrentUser}}
+<form method="post" action="/post/{{.Post.ID}}/like">
+    <button name="value" value="1">Like</button>
+    <button name="value" value="-1">Dislike</button>
+    <button name="value" value="0">Clear</button>
+</form>
+{{end}}
+</article>
+<section>
+<h2>Comments</h2>
+{{range .Comments}}
+<div>
+    <p><strong>{{.Username}}</strong> at {{.CreatedAt}}: {{.Content}}</p>
+    <p>Likes: {{.Likes}} Dislikes: {{.Dislikes}}</p>
+    {{if $.CurrentUser}}
+    <form method="post" action="/comment/{{.ID}}/like">
+        <button name="value" value="1">Like</button>
+        <button name="value" value="-1">Dislike</button>
+        <button name="value" value="0">Clear</button>
+    </form>
+    {{end}}
+</div>
+<hr>
+{{end}}
+{{if .CurrentUser}}
+<form method="post" action="/post/{{.Post.ID}}">
+    <textarea name="content" rows="3" cols="40"></textarea><br>
+    <button type="submit">Add Comment</button>
+</form>
+{{else}}
+<p><a href="/login">Login</a> to comment</p>
+{{end}}
+</section>
+{{end}}
+{{template "base" .}}
