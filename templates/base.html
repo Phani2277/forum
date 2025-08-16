@@ -1,0 +1,25 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{block "title" .}}Forum{{end}}</title>
+</head>
+<body>
+<nav>
+    <a href="/">Home</a>
+    {{if .CurrentUser}}
+        <span>Welcome, {{.CurrentUser.Username}}</span>
+        <form style="display:inline" method="post" action="/logout"><button type="submit">Logout</button></form>
+        <a href="/post/create">New Post</a>
+        <a href="/?filter=my">My Posts</a>
+        <a href="/?filter=liked">Liked Posts</a>
+    {{else}}
+        <a href="/login">Login</a> | <a href="/register">Register</a>
+    {{end}}
+</nav>
+<hr>
+{{block "content" .}}{{end}}
+</body>
+</html>
+{{end}}
