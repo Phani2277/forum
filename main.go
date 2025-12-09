@@ -75,6 +75,49 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := CurrentUser(r)
+
+	if err != nil {
+		w.Write([]byte("need authorization for create post"))
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		w.Write([]byte(`
+            <html><body>
+            <h1>Create Post</h1>
+            <form method="POST" action="/create-post">
+                <input type="text" name="title" placeholder="Title"><br>
+                <textarea name="content" placeholder="Content"></textarea><br>
+                <input type="text" name="category" placeholder="Category"><br>
+                <button type="submit">Создать пост</button>
+            </form>
+            </body></html>
+        `))
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		r.ParseForm()
+		title := r.FormValue("title")
+		content := r.FormValue("content")
+		category := r.FormValue("category")
+
+		err := CreatePost(db, user.ID, title, content, category)
+		if err != nil {
+			w.Write([]byte("error create post"))
+			return
+		}
+
+		w.Write([]byte("post create"))
+		return
+	}
+
+	w.Write([]byte("404"))
+
+}
+
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		w.Write([]byte(`
@@ -147,6 +190,7 @@ func main() {
 	http.HandleFunc("/", HomeHandler)
 	http.HandleFunc("/register", RegisterHandler)
 	http.HandleFunc("/login", LoginHandler)
+	http.HandleFunc("/create-post", CreatePostHandler)
 
 	http.ListenAndServe(":8080", nil)
 
