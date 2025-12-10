@@ -55,6 +55,22 @@ func InitDB() *sql.DB {
 		panic(err)
 	}
 
+	createComments := `
+    CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        created_at DATETIME NOT NULL,
+        likes INTEGER NOT NULL DEFAULT 0,
+        dislikes INTEGER NOT NULL DEFAULT 0
+    );
+`
+	_, err = db.Exec(createComments)
+	if err != nil {
+		panic(err)
+	}
+
 	return db
 
 }

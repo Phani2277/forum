@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"strconv"
 	"time"
 
 	"net/http"
@@ -10,15 +11,42 @@ import (
 var db *sql.DB
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := CurrentUser(r)
+	user, _ := CurrentUser(r)
+
+	posts, err := GetAllPostsd(db)
 
 	if err != nil {
-		w.Write([]byte("Guest"))
+		w.Write([]byte("ошибка получения постов"))
 		return
+
 	}
 
-	w.Write([]byte("User " + user.Username))
+	w.Write([]byte("<html><body>"))
+	if user == nil {
+		w.Write([]byte("<p>Привет, гость!</p>"))
+	} else {
+		w.Write([]byte("<p>Привет, " + user.Username + "!</p>"))
+	}
 
+	w.Write([]byte("<h1>Posts</h1>"))
+
+	for _, p := range posts {
+		w.Write([]byte("<hr>"))
+		w.Write([]byte("<h2>" + p.Title + "</h2>"))
+		w.Write([]byte("<p>" + p.Content + "</p>"))
+		w.Write([]byte("<p>Category: " + p.Category + "</p>"))
+
+		w.Write([]byte(`
+    	<form method="POST" action="/addcomment">
+        <input type="hidden" name="post_id" value="...">
+        <input type="text" name="content" placeholder="Ваш комментарий"><br>
+        <button type="submit">Отправить</button>
+    	</form>
+		`))
+
+	}
+
+	w.Write([]byte("</body></html>"))
 }
 
 func CurrentUser(r *http.Request) (*User, error) {
@@ -73,6 +101,38 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func CommentHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Write([]byte("Method not allowed"))
+		return
+	}
+
+	user, err := CurrentUser(r)
+	if err != nil {
+		w.Write([]byte("Вы должны авторизоваться, чтобы комментировать"))
+		return
+	}
+
+	r.ParseForm()
+	postIDStr := r.FormValue("post_id")
+	content := r.FormValue("content")
+
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		w.Write([]byte("Неверный post_id"))
+		return
+	}
+
+	err = CreateComment(db, postID, user.ID, content)
+	if err != nil {
+		w.Write([]byte("Ошибка при создании комментария"))
+		return
+	}
+
+	// Пока можно просто ответить текстом
+	w.Write([]byte("Комментарий добавлен"))
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -191,6 +251,7 @@ func main() {
 	http.HandleFunc("/register", RegisterHandler)
 	http.HandleFunc("/login", LoginHandler)
 	http.HandleFunc("/create-post", CreatePostHandler)
+	http.HandleFunc("/addcomment", CommentHandler)
 
 	http.ListenAndServe(":8080", nil)
 
