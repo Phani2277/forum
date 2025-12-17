@@ -83,3 +83,18 @@ func GetUserBySessionID(db *sql.DB, sessionID string) (*User, error) {
 
 	return &user, nil
 }
+
+func GetUserByID(db *sql.DB, id int) (*User, error) {
+	query := `SELECT id, email, username, password FROM users WHERE id = ? LIMIT 1`
+
+	row := db.QueryRow(query, id)
+
+	var user User
+	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

@@ -25,6 +25,17 @@ func InitDB() *sql.DB {
 		panic(err)
 	}
 
+	createCategories := `
+	CREATE TABLE IF NOT EXISTS categories (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL UNIQUE
+	);
+	`
+	_, err = db.Exec(createCategories)
+	if err != nil {
+		panic(err)
+	}
+
 	createSessions := `
 		CREATE TABLE IF NOT EXISTS sessions (
 			id TEXT PRIMARY KEY,
@@ -44,7 +55,7 @@ func InitDB() *sql.DB {
     user_id INTEGER NOT NULL,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
-    category TEXT,
+    category_id INTEGER NOT NULL,
     created_at DATETIME NOT NULL,
     count_likes INTEGER NOT NULL DEFAULT 0
 	);
@@ -67,6 +78,19 @@ func InitDB() *sql.DB {
     );
 `
 	_, err = db.Exec(createComments)
+	if err != nil {
+		panic(err)
+	}
+
+	postReactions := `
+	CREATE TABLE IF NOT EXISTS post_reactions (
+        user_id INTEGER NOT NULL,
+    	post_id INTEGER NOT NULL,
+    	value INTEGER NOT NULL,
+    	PRIMARY KEY (user_id, post_id)
+    )
+	`
+	_, err = db.Exec(postReactions)
 	if err != nil {
 		panic(err)
 	}
