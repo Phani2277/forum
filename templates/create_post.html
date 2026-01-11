@@ -1,0 +1,28 @@
+{{define "title"}}Создать пост{{end}}
+
+{{define "content"}}
+  <div class="card">
+    <h2 style="margin-top:0">Создать пост</h2>
+    {{if .Error}}
+      <div class="error">{{.Error}}</div>
+    {{end}}
+    <form method="POST" action="/create-post">
+      <div class="actions">
+        <input type="text" name="title" placeholder="Title">
+      </div>
+      <div class="actions">
+        <textarea name="content" placeholder="Content"></textarea>
+      </div>
+      <div class="actions">
+        <select name="category_id" multiple>
+          {{range .Categories}}
+            <option value="{{.ID}}">{{.Name}}</option>
+          {{end}}
+        </select>
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit">Создать пост</button>
+      </div>
+    </form>
+  </div>
+{{end}}

@@ -1,0 +1,11 @@
+{{define "title"}}Ошибка{{end}}
+
+{{define "content"}}
+  <div class="card">
+    <h2 style="margin-top:0">Ошибка {{.Status}}</h2>
+    <p class="muted">{{.Message}}</p>
+    <div class="actions">
+      <a class="btn ghost" href="/">На главную</a>
+    </div>
+  </div>
+{{end}}

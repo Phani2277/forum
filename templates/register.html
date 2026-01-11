@@ -1,0 +1,24 @@
+{{define "title"}}Регистрация{{end}}
+
+{{define "content"}}
+  <div class="card">
+    <h2 style="margin-top:0">Регистрация</h2>
+    {{if .Error}}
+      <div class="error">{{.Error}}</div>
+    {{end}}
+    <form method="POST" action="/register">
+      <div class="actions">
+        <input type="email" name="email" placeholder="Email">
+      </div>
+      <div class="actions">
+        <input type="text" name="username" placeholder="Username">
+      </div>
+      <div class="actions">
+        <input type="password" name="password" placeholder="Password">
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit">Зарегистрироваться</button>
+      </div>
+    </form>
+  </div>
+{{end}}

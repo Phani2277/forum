@@ -1,0 +1,77 @@
+{{define "title"}}Главная{{end}}
+
+{{define "content"}}
+  <div class="section filter-panel">
+    <div class="filter-group">
+      <div class="filter-label">Категории</div>
+      <div class="filter-chips">
+        <a class="chip{{if .AllActive}} active{{end}}" href="/">Все</a>
+        {{range .Categories}}
+          <a class="chip{{if eq $.SelectedCategoryID .ID}} active{{end}}" href="/?category_id={{.ID}}">{{.Name}}</a>
+        {{end}}
+      </div>
+    </div>
+
+    {{if .CurrentUser}}
+      <div class="filter-group">
+        <div class="filter-label">Фильтры</div>
+        <div class="filter-chips">
+          <a class="chip{{if .MineActive}} active{{end}}" href="/?mine=1">Мои</a>
+          <a class="chip{{if .LikedActive}} active{{end}}" href="/?liked=1">Лайкнутые</a>
+        </div>
+      </div>
+    {{end}}
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Посты</h2>
+      <span class="muted">{{len .Posts}}</span>
+    </div>
+  </div>
+
+  {{range .Posts}}
+    <div class="card">
+      <div class="row post-head">
+        <h3 class="post-title">{{.Title}}</h3>
+        <a class="pill" href="/post?id={{.ID}}">Подробнее</a>
+      </div>
+      <div class="muted post-meta">
+        Категория: {{.CategoryName}} • Автор: {{.AuthorName}}
+      </div>
+      <p>{{.Content}}</p>
+
+      <div class="row">
+        <form class="inline" method="POST" action="/react-post">
+          <input type="hidden" name="post_id" value="{{.ID}}">
+          <input type="hidden" name="value" value="1">
+          <button class="btn ghost icon" type="submit">👍</button>
+        </form>
+
+        <form class="inline" method="POST" action="/react-post">
+          <input type="hidden" name="post_id" value="{{.ID}}">
+          <input type="hidden" name="value" value="-1">
+          <button class="btn ghost icon" type="submit">👎</button>
+        </form>
+
+        <span class="muted">👍 {{.Likes}} • 👎 {{.Dislikes}}</span>
+      </div>
+
+      <div style="margin-top:10px">
+        {{range .Comments}}
+          <div class="comment"><b>{{.AuthorName}}:</b> {{.Content}}</div>
+        {{end}}
+      </div>
+
+      {{if $.CurrentUser}}
+        <form class="actions" method="POST" action="/addcomment">
+          <input type="hidden" name="post_id" value="{{.ID}}">
+          <input class="comment-input" type="text" name="content" placeholder="Комментарий">
+          <button class="btn" type="submit">Отправить</button>
+        </form>
+      {{else}}
+        <div class="muted" style="margin-top:10px">Войдите, чтобы комментировать</div>
+      {{end}}
+    </div>
+  {{end}}
+{{end}}

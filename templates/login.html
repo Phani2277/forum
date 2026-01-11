@@ -1,0 +1,21 @@
+{{define "title"}}Вход{{end}}
+
+{{define "content"}}
+  <div class="card">
+    <h2 style="margin-top:0">Вход</h2>
+    {{if .Error}}
+      <div class="error">{{.Error}}</div>
+    {{end}}
+    <form method="POST" action="/login">
+      <div class="actions">
+        <input type="email" name="email" placeholder="Email">
+      </div>
+      <div class="actions">
+        <input type="password" name="password" placeholder="Password">
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit">Войти</button>
+      </div>
+    </form>
+  </div>
+{{end}}
